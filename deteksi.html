@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Demo Sistem Deteksi Intrusi Siber</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f7f6; }
+        .card { background: white; padding: 25px; border-radius: 8px; max-width: 500px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%; }
+        button:hover { background: #0056b3; }
+        #hasil { margin-top: 20px; padding: 15px; border-radius: 5px; font-weight: bold; text-align: center; }
+        .normal { background: #d4edda; color: #155724; }
+        .serangan { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Sistem Deteksi Serangan Siber</h2>
+    <p>Klik tombol di bawah untuk menguji sampel paket jaringan ke API Model:</p>
+    
+    <button onclick="cekTrafik()">Analisis Paket Jaringan</button>
+
+    <div id="hasil" style="display: none;"></div>
+</div>
+
+<script>
+async function cekTrafik() {
+    const divHasil = document.getElementById('hasil');
+    divHasil.style.display = 'block';
+    divHasil.className = '';
+    divHasil.innerText = 'Memproses analisis model...';
+
+    // Data sampel 10 fitur yang dikirim ke API
+    const dataJaringan = {
+        "Destination Port": 80,
+        "Flow Duration": 1200,
+        "Total Fwd Packets": 4,
+        "Total Length of Fwd Packets": 250,
+        "Fwd Packet Length Max": 100,
+        "Fwd Packet Length Mean": 62.5,
+        "Fwd Packet Length Std": 15.2,
+        "FIN Flag Count": 0,
+        "PSH Flag Count": 1,
+        "ACK Flag Count": 1
+    };
+
+    try {
+        // Panggil API Flask lokal yang berjalan di port 5000
+        const response = await fetch('http://127.0.0.1:5000/predict', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dataJaringan)
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+            const label = result.result; // misal: "Normal Traffic"
+            
+            if (label === 'Normal Traffic') {
+                divHasil.className = 'normal';
+                divHasil.innerText = 'STATUS: ' + label + ' (Aman)';
+            } else {
+                divHasil.className = 'serangan';
+                divHasil.innerText = 'PERINGATAN: Terdeteksi ' + label + '!';
+            }
+        } else {
+            divHasil.innerText = 'Error: ' + result.message;
+        }
+    } catch (error) {
+        divHasil.innerText = 'Gagal terhubung ke API Flask. Pastikan python app.py running!';
+    }
+}
+</script>
+
+</body>
+</html>
