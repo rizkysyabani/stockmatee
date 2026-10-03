@@ -3,7 +3,7 @@ name: Deploy to InfinityFree FTP
 on:
   push:
     branches:
-      - main  # Ganti ke 'master' jika branch utama repository kamu bernama master
+      - main
 
 jobs:
   web-deploy:
@@ -19,4 +19,4 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: ${{ secrets.FTP_SERVER_DIR }}
+        server-dir: htdocs/
